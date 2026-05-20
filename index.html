@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>The BaJa Open</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal:#1FCEC9;
+    --teal-light:#5FE3DE;
+    --teal-dark:#0FA5A0;
+    --navy:#0A2E3D;
+    --navy-light:#13455C;
+    --navy-dark:#061E29;
+    --cream:#F2F7F6;
+    --tan:#9CB8B6;
+    --gold:#FFD66B;
+    --red:#FF6B6B;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--navy-dark);color:var(--cream);font-family:'DM Sans',sans-serif;min-height:100vh;}
+  body{padding:20px;max-width:600px;margin:0 auto;padding-bottom:40px;}
+  h1,h2,h3{font-family:'Bebas Neue',cursive;letter-spacing:2px;margin:0;}
+  .brand{text-align:center;padding:14px 0 6px;}
+  .brand .tag{font-size:.7rem;letter-spacing:4px;color:var(--teal);text-transform:uppercase;margin-bottom:4px;}
+  .brand h1{font-size:2.8rem;color:var(--cream);letter-spacing:3px;line-height:1;}
+  .brand h1 .j{color:var(--teal);}
+  .brand .sub{font-size:.75rem;color:var(--tan);margin-top:6px;letter-spacing:1px;}
+  .card{background:linear-gradient(180deg,var(--navy-light) 0%,var(--navy) 100%);border:1px solid rgba(31,206,201,.18);border-radius:14px;padding:18px;margin-bottom:14px;box-shadow:0 4px 16px rgba(0,0,0,.3);}
+  .card-label{font-size:.7rem;color:var(--tan);text-transform:uppercase;letter-spacing:1.8px;margin-bottom:10px;}
+  input,select{width:100%;padding:13px 14px;border-radius:10px;border:1px solid rgba(31,206,201,.3);background:rgba(0,0,0,.25);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:1rem;}
+  input:focus,select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(31,206,201,.2);}
+  label{display:block;font-size:.72rem;color:var(--tan);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;}
+  .field{margin-bottom:14px;}
+  .btn{display:block;width:100%;padding:14px;border-radius:10px;border:none;background:var(--teal);color:var(--navy-dark);font-family:'Bebas Neue',cursive;font-size:1.2rem;letter-spacing:2px;cursor:pointer;transition:transform .1s,box-shadow .15s;}
+  .btn:active{transform:scale(.98);}
+  .btn:hover{box-shadow:0 4px 18px rgba(31,206,201,.35);}
+  .btn.ghost{background:transparent;color:var(--teal);border:1px solid rgba(31,206,201,.4);}
+  .btn.danger{background:transparent;color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .row{display:flex;gap:10px;}
+  .row > *{flex:1;}
+  .small{font-size:.78rem;color:var(--tan);}
+  .center{text-align:center;}
+  /* Tabs */
+  .tabs{display:flex;gap:4px;margin-bottom:14px;background:rgba(0,0,0,.25);padding:4px;border-radius:12px;}
+  .tab{flex:1;padding:11px 8px;background:transparent;border:none;color:var(--tan);font-family:'Bebas Neue',cursive;font-size:1rem;letter-spacing:1.5px;cursor:pointer;border-radius:9px;}
+  .tab.active{background:var(--teal);color:var(--navy-dark);}
+  /* Leaderboard */
+  .lb-row{display:flex;align-items:center;padding:13px 10px;border-bottom:1px solid rgba(31,206,201,.08);gap:10px;}
+  .lb-row:last-child{border-bottom:none;}
+  .lb-row.you{background:rgba(31,206,201,.08);border-radius:10px;}
+  .lb-row.leader{background:linear-gradient(90deg,rgba(255,214,107,.15) 0%,rgba(255,214,107,.04) 100%);}
+  .lb-pos{font-family:'Bebas Neue',cursive;font-size:1.4rem;width:36px;color:var(--tan);text-align:center;flex-shrink:0;}
+  .lb-pos.leader{color:var(--gold);}
+  .lb-name{flex:1;min-width:0;}
+  .lb-name .n{font-weight:600;font-size:.95rem;color:var(--cream);}
+  .lb-name .sub{font-size:.7rem;color:var(--tan);margin-top:2px;}
+  .lb-score{text-align:right;flex-shrink:0;}
+  .lb-score .gross{font-family:'Bebas Neue',cursive;font-size:1.5rem;color:var(--cream);line-height:1;}
+  .lb-score .net{font-size:.72rem;color:var(--teal);margin-top:3px;font-weight:600;}
+  .lb-score .net.thru{color:var(--tan);}
+  /* Scorecard */
+  .holes-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px;}
+  .hole-cell{background:rgba(0,0,0,.25);border:1px solid rgba(31,206,201,.15);border-radius:10px;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .hole-cell .h-info{flex:1;min-width:0;}
+  .hole-cell .h-num{font-family:'Bebas Neue',cursive;font-size:1.2rem;color:var(--teal);line-height:1;}
+  .hole-cell .h-par{font-size:.68rem;color:var(--tan);margin-top:2px;}
+  .hole-cell input{width:54px;text-align:center;padding:8px 4px;font-family:'Bebas Neue',cursive;font-size:1.3rem;}
+  .totals{display:flex;justify-content:space-around;padding:14px;background:rgba(31,206,201,.08);border-radius:10px;margin-top:14px;}
+  .totals .tcell{text-align:center;}
+  .totals .tcell .tlbl{font-size:.68rem;color:var(--tan);text-transform:uppercase;letter-spacing:1.5px;}
+  .totals .tcell .tval{font-family:'Bebas Neue',cursive;font-size:1.8rem;color:var(--cream);line-height:1.2;}
+  .totals .tcell .tval.net{color:var(--teal);}
+  /* Champion banner */
+  .champ{background:linear-gradient(135deg,rgba(255,214,107,.2) 0%,rgba(255,214,107,.05) 100%);border:1px solid rgba(255,214,107,.4);border-radius:14px;padding:20px;text-align:center;margin-bottom:14px;}
+  .champ .crown{font-size:1.8rem;}
+  .champ .label{font-size:.7rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin:6px 0 2px;}
+  .champ .name{font-family:'Bebas Neue',cursive;font-size:1.8rem;letter-spacing:2px;color:var(--cream);}
+  .champ .scores{font-size:.85rem;color:var(--tan);margin-top:4px;}
+  /* Status */
+  .event-status{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.65rem;text-transform:uppercase;letter-spacing:1.5px;background:rgba(31,206,201,.15);color:var(--teal);font-weight:600;}
+  .event-status.live{background:rgba(31,206,201,.2);color:var(--teal);}
+  .event-status.live::before{content:'';display:inline-block;width:6px;height:6px;background:var(--teal);border-radius:50%;margin-right:5px;vertical-align:middle;animation:pulse 1.5s infinite;}
+  .event-status.upcoming{background:rgba(156,184,182,.15);color:var(--tan);}
+  .event-status.final{background:rgba(255,214,107,.15);color:var(--gold);}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+  .empty{text-align:center;padding:30px 16px;color:var(--tan);font-size:.88rem;line-height:1.6;}
+  .syncing{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:var(--teal);color:var(--navy-dark);padding:8px 16px;border-radius:20px;font-size:.75rem;font-weight:600;display:none;z-index:100;}
+  .offline-pill{position:fixed;top:8px;right:8px;background:var(--red);color:white;padding:5px 11px;border-radius:14px;font-size:.65rem;font-weight:600;letter-spacing:.5px;display:none;z-index:100;}
+</style>
+</head>
+<body>
+
+<div class="offline-pill" id="offline-pill">OFFLINE</div>
+<div class="syncing" id="syncing">Syncing...</div>
+
+<!-- Brand -->
+<div class="brand">
+  <div class="tag">May 24 &middot; Eagle Dunes</div>
+  <h1>Ba<span class="j">J</span>a Open</h1>
+  <div class="sub" id="event-status-line">Loading...</div>
+</div>
+
+<!-- Signup -->
+<div id="signup-screen">
+  <div class="card">
+    <div class="card-label">Join the Tournament</div>
+    <div class="field">
+      <label>Your Name</label>
+      <input id="signup-name" type="text" placeholder="e.g. Mike T." maxlength="20" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Your Handicap (1–40)</label>
+      <input id="signup-hcp" type="number" inputmode="numeric" min="1" max="40" placeholder="e.g. 18">
+    </div>
+    <button class="btn" onclick="joinEvent()">Join the BaJa Open</button>
+    <div class="small center" style="margin-top:14px;">
+      Whites tee &middot; Par 72 &middot; 6073 yards<br>
+      Net score wins. Lowest net = champion.
+    </div>
+  </div>
+</div>
+
+<!-- Main app (hidden until joined) -->
+<div id="app" style="display:none;">
+  <div class="tabs">
+    <button class="tab active" id="tab-card" onclick="showTab('card')">My Card</button>
+    <button class="tab" id="tab-board" onclick="showTab('board')">Leaderboard</button>
+  </div>
+
+  <!-- My Scorecard -->
+  <div id="view-card">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+        <div>
+          <div class="card-label" style="margin-bottom:2px;">Playing As</div>
+          <div style="font-family:'Bebas Neue',cursive;font-size:1.5rem;letter-spacing:1.5px;color:var(--cream);" id="me-name"></div>
+          <div class="small" id="me-hcp"></div>
+        </div>
+        <button class="btn ghost" style="width:auto;padding:8px 14px;font-size:.85rem;" onclick="signOut()">Switch</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Enter Your Scores</div>
+      <div class="holes-grid" id="holes-grid"></div>
+      <div class="totals">
+        <div class="tcell"><div class="tlbl">Thru</div><div class="tval" id="t-thru">0</div></div>
+        <div class="tcell"><div class="tlbl">Gross</div><div class="tval" id="t-gross">-</div></div>
+        <div class="tcell"><div class="tlbl">vs Par</div><div class="tval" id="t-vspar">-</div></div>
+        <div class="tcell"><div class="tlbl">Net</div><div class="tval net" id="t-net">-</div></div>
+      </div>
+      <div class="small center" style="margin-top:14px;">Scores save automatically. Leaderboard updates live.</div>
+    </div>
+  </div>
+
+  <!-- Leaderboard -->
+  <div id="view-board" style="display:none;">
+    <div id="champ-banner"></div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div class="card-label" style="margin:0;">Live Leaderboard</div>
+        <span class="event-status" id="event-pill">Loading</span>
+      </div>
+      <div id="lb-rows"><div class="empty">Loading players...</div></div>
+      <div class="small center" style="margin-top:14px;line-height:1.6;">
+        Sorted by net (lowest wins). Gross shown big, net shown in teal.<br>
+        <span style="opacity:.7;">"Thru" = holes completed.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ============ Config ============
+const SUPA_URL='https://lzthrmmwalesunzsqjvh.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6dGhybW13YWxlc3VuenNxanZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1MDYzNTgsImV4cCI6MjA4ODA4MjM1OH0.Rp1w3BdihG3wCJuyWj0QeFmJRe_wn55JFdkhm9bZBbM';
+const supa=supabase.createClient(SUPA_URL,SUPA_KEY);
+
+// Eagle Dunes Whites: par 72, pars per hole
+const PARS=[5,4,3,4,4,4,4,3,5,4,3,4,4,5,4,3,4,5];
+const YARDAGES=[492,384,128,266,400,300,346,128,486,377,126,398,362,494,388,172,340,486];
+const TOTAL_PAR=PARS.reduce((a,b)=>a+b,0);
+const EVENT_ID='baja-open-2026-05-24'; // fixed event id, no need for multi-event support
+const EVENT_START=new Date('2026-05-24T16:06:00Z'); // 12:06pm ET = 16:06 UTC (EDT)
+
+// ============ State ============
+let me=null; // {id, name, handicap, scores}
+let players=[]; // all rows
+let subscription=null;
+let savingTimer=null;
+let pendingSave=null;
+
+// ============ Helpers ============
+function $(id){return document.getElementById(id);}
+function escHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function localGet(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}}
+function localSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+
+function sumScores(scores){
+  if(!Array.isArray(scores))return {gross:0,thru:0,vspar:0,parThru:0};
+  let gross=0,thru=0,parThru=0;
+  for(let i=0;i<18;i++){
+    const s=scores[i];
+    if(s!=null&&s>0){gross+=s;thru++;parThru+=PARS[i];}
+  }
+  return {gross,thru,vspar:gross-parThru,parThru};
+}
+
+function eventStatus(){
+  const now=new Date();
+  if(now<EVENT_START)return 'upcoming';
+  // Consider "live" for 6 hours after start, then final
+  const finalAt=new Date(EVENT_START.getTime()+6*60*60*1000);
+  if(now<finalAt)return 'live';
+  // Or if everyone with scores has 18 entered, also final
+  const allDone=players.length>0 && players.every(p=>{
+    const s=p.scores||[];
+    return s.filter(x=>x!=null&&x>0).length===18;
+  });
+  if(allDone)return 'final';
+  return 'live';
+}
+
+function statusLine(){
+  const s=eventStatus();
+  if(s==='upcoming'){
+    const ms=EVENT_START-new Date();
+    const days=Math.floor(ms/86400000);
+    if(days>1)return `Starts in ${days} days &middot; Sun 12:06pm`;
+    if(days===1)return `Tomorrow at 12:06pm`;
+    const hours=Math.floor(ms/3600000);
+    if(hours>0)return `Starts in ${hours} hours`;
+    const mins=Math.max(0,Math.floor(ms/60000));
+    return `Starts in ${mins} minutes`;
+  }
+  if(s==='final')return `Final &middot; Sunday May 24`;
+  return `Live &middot; Sunday May 24`;
+}
+
+// ============ Signup / Auth ============
+function joinEvent(){
+  const name=$('signup-name').value.trim();
+  const hcp=parseInt($('signup-hcp').value,10);
+  if(!name){alert('Enter your name to join.');return;}
+  if(!Number.isFinite(hcp)||hcp<1||hcp>40){alert('Handicap must be a number from 1 to 40.');return;}
+  _createPlayer(name,hcp);
+}
+
+async function _createPlayer(name,hcp){
+  // Make a unique device id so this device is tied to this player row
+  let deviceId=localGet('baja_device');
+  if(!deviceId){deviceId=crypto.randomUUID();localSet('baja_device',deviceId);}
+  // Insert (or reuse) — if a row with this device_id exists, reuse it
+  const {data:existing}=await supa.from('baja_players').select('*').eq('event_id',EVENT_ID).eq('device_id',deviceId).maybeSingle();
+  if(existing){
+    me=existing;
+    localSet('baja_me',{id:existing.id,deviceId});
+    initApp();
+    return;
+  }
+  const newRow={event_id:EVENT_ID,device_id:deviceId,name,handicap:hcp,scores:new Array(18).fill(null)};
+  const {data,error}=await supa.from('baja_players').insert(newRow).select().single();
+  if(error){alert('Could not join. '+(error.message||''));return;}
+  me=data;
+  localSet('baja_me',{id:data.id,deviceId});
+  initApp();
+}
+
+function signOut(){
+  if(!confirm('Switch player? Your scores stay safe — you can rejoin with the same name.'))return;
+  localStorage.removeItem('baja_me');
+  // Keep device id so rejoining on same device finds the same row
+  location.reload();
+}
+
+async function checkExistingSession(){
+  const stored=localGet('baja_me');
+  if(!stored||!stored.id)return false;
+  const {data,error}=await supa.from('baja_players').select('*').eq('event_id',EVENT_ID).eq('id',stored.id).maybeSingle();
+  if(error||!data){
+    localStorage.removeItem('baja_me');
+    return false;
+  }
+  me=data;
+  return true;
+}
+
+// ============ App init ============
+async function initApp(){
+  $('signup-screen').style.display='none';
+  $('app').style.display='block';
+  $('me-name').textContent=me.name;
+  $('me-hcp').textContent='Handicap '+me.handicap;
+  buildHolesGrid();
+  await loadAllPlayers();
+  renderTotals();
+  renderLeaderboard();
+  subscribeLive();
+  setInterval(()=>{$('event-status-line').innerHTML=statusLine();renderLeaderboard();},30000);
+}
+
+function buildHolesGrid(){
+  const grid=$('holes-grid');
+  grid.innerHTML='';
+  for(let i=0;i<18;i++){
+    const cell=document.createElement('div');
+    cell.className='hole-cell';
+    cell.innerHTML=`
+      <div class="h-info">
+        <div class="h-num">${i+1}</div>
+        <div class="h-par">Par ${PARS[i]} &middot; ${YARDAGES[i]}y</div>
+      </div>
+      <input type="number" inputmode="numeric" min="1" max="15" data-hole="${i}" placeholder="-" value="${me.scores&&me.scores[i]!=null?me.scores[i]:''}">
+    `;
+    grid.appendChild(cell);
+  }
+  grid.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input',onScoreInput);
+    inp.addEventListener('blur',onScoreBlur);
+  });
+}
+
+function onScoreInput(e){
+  const idx=parseInt(e.target.dataset.hole,10);
+  const raw=e.target.value.trim();
+  const val=raw===''?null:parseInt(raw,10);
+  if(raw!==''&&(!Number.isFinite(val)||val<1||val>15)){
+    // Allow typing but show no save until valid; just skip
+    return;
+  }
+  if(!Array.isArray(me.scores))me.scores=new Array(18).fill(null);
+  me.scores[idx]=val;
+  renderTotals();
+  // Debounce save so rapid typing doesn't hammer the network
+  if(savingTimer)clearTimeout(savingTimer);
+  savingTimer=setTimeout(saveScores,400);
+}
+
+function onScoreBlur(){if(savingTimer){clearTimeout(savingTimer);saveScores();}}
+
+async function saveScores(){
+  if(!me)return;
+  showSyncing(true);
+  const {error}=await supa.from('baja_players').update({scores:me.scores}).eq('id',me.id);
+  showSyncing(false);
+  if(error){
+    // Save locally; will retry on next input or reconnect
+    localSet('baja_pending_'+me.id,me.scores);
+    pendingSave=me.scores;
+    return;
+  }
+  localStorage.removeItem('baja_pending_'+me.id);
+  pendingSave=null;
+  // Optimistically update local player list so leaderboard reflects fast
+  const idx=players.findIndex(p=>p.id===me.id);
+  if(idx>=0)players[idx]={...players[idx],scores:[...me.scores]};
+  renderLeaderboard();
+}
+
+function showSyncing(on){
+  $('syncing').style.display=on?'block':'none';
+}
+
+// ============ Loading & realtime ============
+async function loadAllPlayers(){
+  const {data,error}=await supa.from('baja_players').select('*').eq('event_id',EVENT_ID).order('created_at',{ascending:true});
+  if(error){console.error('load players',error);players=[];return;}
+  players=data||[];
+  // Refresh me from the same source so we never disagree
+  const fresh=players.find(p=>p.id===me.id);
+  if(fresh)me=fresh;
+}
+
+function subscribeLive(){
+  if(subscription)return;
+  subscription=supa.channel('baja_'+EVENT_ID)
+    .on('postgres_changes',{event:'*',schema:'public',table:'baja_players',filter:'event_id=eq.'+EVENT_ID},payload=>{
+      const row=payload.new||payload.old;
+      if(!row)return;
+      if(payload.eventType==='DELETE'){
+        players=players.filter(p=>p.id!==row.id);
+      } else if(payload.eventType==='INSERT'){
+        if(!players.find(p=>p.id===row.id))players.push(row);
+      } else if(payload.eventType==='UPDATE'){
+        const i=players.findIndex(p=>p.id===row.id);
+        if(i>=0)players[i]=row;
+        else players.push(row);
+        // If it is me, only update scores if mine match (don't clobber unsaved input)
+        if(row.id===me.id){
+          // server is source of truth; reflect handicap/name changes
+          me.handicap=row.handicap;me.name=row.name;
+        }
+      }
+      renderLeaderboard();
+    })
+    .subscribe();
+}
+
+// ============ Rendering ============
+function renderTotals(){
+  const s=sumScores(me.scores||[]);
+  $('t-thru').textContent=s.thru;
+  $('t-gross').textContent=s.gross||'-';
+  $('t-vspar').textContent=s.thru?(s.vspar===0?'E':(s.vspar>0?'+'+s.vspar:s.vspar)):'-';
+  if(s.thru===18){
+    $('t-net').textContent=(s.gross-me.handicap);
+  } else if(s.thru>0){
+    $('t-net').textContent='-';
+  } else {
+    $('t-net').textContent='-';
+  }
+}
+
+function renderLeaderboard(){
+  $('event-status-line').innerHTML=statusLine();
+  const stat=eventStatus();
+  const pill=$('event-pill');
+  if(pill){
+    pill.className='event-status '+stat;
+    pill.textContent=stat==='upcoming'?'Upcoming':stat==='final'?'Final':'Live';
+  }
+  // Compute each player's net (only if they have 18 holes); for partial,
+  // sort by gross-thru-par adjusted using their proportional handicap
+  // so the in-progress board roughly ranks players against each other.
+  const rows=players.map(p=>{
+    const s=sumScores(p.scores||[]);
+    // Pro-rate handicap by holes played so a leader after 9 isn't unfairly
+    // shown net 70 when their full handicap is 18.
+    const hcpUsed=s.thru>0?Math.round((p.handicap||0)*(s.thru/18)):0;
+    const liveNet=s.thru>0?(s.gross-hcpUsed):null;
+    const finalNet=s.thru===18?(s.gross-(p.handicap||0)):null;
+    return {p,s,liveNet,finalNet,hcpUsed};
+  });
+  // Sort: those who have started come first, sorted by live net; then those who haven't.
+  rows.sort((a,b)=>{
+    if(a.s.thru>0&&b.s.thru===0)return -1;
+    if(b.s.thru>0&&a.s.thru===0)return 1;
+    if(a.s.thru===0&&b.s.thru===0)return a.p.name.localeCompare(b.p.name);
+    if(a.liveNet!==b.liveNet)return a.liveNet-b.liveNet;
+    return b.s.thru-a.s.thru; // tiebreak: further along ranks higher
+  });
+  // Champion banner only if someone has finished AND event is in live/final
+  const finished=rows.filter(r=>r.s.thru===18).sort((a,b)=>a.finalNet-b.finalNet);
+  const allDone=players.length>0&&rows.every(r=>r.s.thru===18);
+  const banner=$('champ-banner');
+  if(finished.length&&allDone){
+    const c=finished[0];
+    banner.innerHTML=`<div class="champ">
+      <div class="crown">&#127942;</div>
+      <div class="label">Champion</div>
+      <div class="name">${escHtml(c.p.name)}</div>
+      <div class="scores">Gross ${c.s.gross} &middot; Net ${c.finalNet} &middot; Handicap ${c.p.handicap}</div>
+    </div>`;
+  } else if(finished.length){
+    // Someone has finished but not everyone — show "clubhouse leader"
+    const c=finished[0];
+    banner.innerHTML=`<div class="champ">
+      <div class="crown">&#127948;</div>
+      <div class="label">Clubhouse Leader</div>
+      <div class="name">${escHtml(c.p.name)}</div>
+      <div class="scores">Gross ${c.s.gross} &middot; Net ${c.finalNet}</div>
+    </div>`;
+  } else {
+    banner.innerHTML='';
+  }
+  const lb=$('lb-rows');
+  if(!players.length){
+    lb.innerHTML='<div class="empty">Waiting for players to join...<br><span style="opacity:.7;">Share the link with your group!</span></div>';
+    return;
+  }
+  lb.innerHTML=rows.map((r,i)=>{
+    const isMe=me&&r.p.id===me.id;
+    const isLeader=i===0&&r.s.thru>0;
+    let scoreHTML='';
+    if(r.s.thru===0){
+      scoreHTML=`<div class="net thru">Not started</div>`;
+    } else if(r.s.thru<18){
+      scoreHTML=`
+        <div class="gross">${r.s.gross}</div>
+        <div class="net">Net ~${r.liveNet} &middot; Thru ${r.s.thru}</div>`;
+    } else {
+      scoreHTML=`
+        <div class="gross">${r.s.gross}</div>
+        <div class="net">Net ${r.finalNet} &middot; F</div>`;
+    }
+    const pos=r.s.thru>0?(i+1):'-';
+    return `<div class="lb-row${isMe?' you':''}${isLeader?' leader':''}">
+      <div class="lb-pos${isLeader?' leader':''}">${pos}</div>
+      <div class="lb-name">
+        <div class="n">${escHtml(r.p.name)}${isMe?' <span style="color:var(--teal);font-weight:400;font-size:.72rem;">(you)</span>':''}</div>
+        <div class="sub">Hcp ${r.p.handicap}${r.s.thru>0&&r.s.thru<18?' &middot; '+(r.s.vspar===0?'E':(r.s.vspar>0?'+'+r.s.vspar:r.s.vspar))+' vs par':''}</div>
+      </div>
+      <div class="lb-score">${scoreHTML}</div>
+    </div>`;
+  }).join('');
+}
+
+function showTab(which){
+  $('tab-card').classList.toggle('active',which==='card');
+  $('tab-board').classList.toggle('active',which==='board');
+  $('view-card').style.display=which==='card'?'block':'none';
+  $('view-board').style.display=which==='board'?'block':'none';
+  if(which==='board')renderLeaderboard();
+}
+
+// ============ Offline indicator + retry ============
+function updateOnline(){
+  $('offline-pill').style.display=navigator.onLine?'none':'block';
+  if(navigator.onLine&&me){
+    const pending=localGet('baja_pending_'+me.id);
+    if(pending){me.scores=pending;saveScores();}
+  }
+}
+window.addEventListener('online',updateOnline);
+window.addEventListener('offline',updateOnline);
+
+// ============ Boot ============
+(async function(){
+  $('event-status-line').innerHTML=statusLine();
+  updateOnline();
+  const ok=await checkExistingSession();
+  if(ok){initApp();}
+})();
+</script>
+</body>
+</html>
