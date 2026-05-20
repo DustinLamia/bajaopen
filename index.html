@@ -179,6 +179,23 @@
   .locked-banner{background:linear-gradient(90deg,rgba(219,21,31,.18) 0%,rgba(219,21,31,.05) 100%);border:1px solid rgba(219,21,31,.4);border-radius:12px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
   .locked-banner .lbl{font-family:'Bebas Neue',cursive;font-size:1.1rem;color:var(--bb-red-soft);letter-spacing:1.5px;}
   .locked-banner .sub{font-size:.72rem;color:var(--bb-cream-dim);margin-top:2px;}
+
+  /* Test panel — only visible with ?test=1 */
+  .test-panel{position:fixed;bottom:14px;right:14px;background:rgba(0,0,0,.92);border:2px solid var(--bb-gold);border-radius:12px;padding:12px;z-index:200;max-width:240px;box-shadow:0 6px 22px rgba(0,0,0,.6);}
+  .test-panel .tp-title{font-family:'Bebas Neue',cursive;font-size:.95rem;letter-spacing:2px;color:var(--bb-gold);margin-bottom:8px;text-transform:uppercase;}
+  .test-panel .tp-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;}
+  .test-panel .tp-row:last-child{margin-bottom:0;}
+  .test-panel .tp-lbl{font-size:.7rem;color:var(--bb-cream);line-height:1.3;}
+  .test-panel .tp-switch{position:relative;display:inline-block;width:38px;height:22px;flex-shrink:0;}
+  .test-panel .tp-switch input{opacity:0;width:0;height:0;}
+  .test-panel .tp-slider{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.15);border-radius:22px;transition:.2s;}
+  .test-panel .tp-slider::before{content:'';position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.2s;}
+  .test-panel input:checked + .tp-slider{background:var(--bb-gold);}
+  .test-panel input:checked + .tp-slider::before{transform:translateX(16px);}
+  .test-panel .tp-btn{width:100%;padding:7px;border-radius:7px;border:1px solid var(--bb-gold);background:transparent;color:var(--bb-gold);font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;margin-top:6px;}
+  .test-panel .tp-btn:hover{background:rgba(255,214,107,.15);}
+  .test-banner{background:rgba(255,214,107,.15);border:1px dashed var(--bb-gold);color:var(--bb-gold);text-align:center;padding:6px 10px;border-radius:8px;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:12px;display:none;}
+  .test-banner.show{display:block;}
 </style>
 </head>
 <body>
@@ -190,6 +207,19 @@
   <div class="tag">May 24 &middot; Eagle Dunes</div>
   <h1>Ba<span class="j">J</span>a Open</h1>
   <div class="sub" id="event-status-line">Loading...</div>
+</div>
+
+<div class="test-banner" id="test-banner">Test Mode &middot; Scoring Unlocked</div>
+
+<!-- Test panel (only visible with ?test=1) -->
+<div class="test-panel" id="test-panel" style="display:none;">
+  <div class="tp-title">Test Mode</div>
+  <div class="tp-row">
+    <div class="tp-lbl">Unlock scoring</div>
+    <label class="tp-switch"><input type="checkbox" id="test-unlock" onchange="toggleTestUnlock(this.checked)"><span class="tp-slider"></span></label>
+  </div>
+  <button class="tp-btn" onclick="fillRandomScores()">Fill random scores</button>
+  <button class="tp-btn" onclick="clearMyScores()">Clear my scores</button>
 </div>
 
 <!-- Signup -->
@@ -386,7 +416,10 @@ function scoreClass(score,par){
   return 'double';
 }
 
-function scoringIsOpen(){return new Date()>=SCORING_OPENS;}
+function scoringIsOpen(){
+  if(window._testOverrideUnlocked)return true;
+  return new Date()>=SCORING_OPENS;
+}
 function isLocked(p){return p&&p.locked_at!=null;}
 
 function eventStatus(){
@@ -875,8 +908,78 @@ function updateOnline(){
 window.addEventListener('online',updateOnline);
 window.addEventListener('offline',updateOnline);
 
+// ===== Test mode =====
+function isTestMode(){
+  return new URLSearchParams(location.search).get('test')==='1';
+}
+
+function toggleTestUnlock(on){
+  window._testOverrideUnlocked=on;
+  $('test-banner').classList.toggle('show',on);
+  renderLockOverlay();
+  applyLockUI();
+  renderTotals();
+  renderLeaderboard();
+}
+
+function fillRandomScores(){
+  if(!me)return;
+  if(isLocked(me)){alert('Card is locked — leave and rejoin to test again.');return;}
+  if(!window._testOverrideUnlocked&&!scoringIsOpen()){
+    alert('Toggle "Unlock scoring" first.');
+    return;
+  }
+  // Realistic random scores for someone with this handicap (rough)
+  const hcp=me.handicap||18;
+  const baselineOverPar=hcp*0.9; // close to handicap, not perfect
+  const scores=[];
+  for(let i=0;i<18;i++){
+    // Distribute extra strokes mostly +1 and +2 vs par with occasional birdies and blow-ups
+    const r=Math.random();
+    let delta;
+    if(r<0.03)delta=-1; // birdie 3%
+    else if(r<0.25)delta=0; // par 22%
+    else if(r<0.65)delta=1; // bogey 40%
+    else if(r<0.85)delta=2; // double 20%
+    else if(r<0.95)delta=3; // triple 10%
+    else delta=4; // blow-up 5%
+    scores.push(Math.max(1,PARS[i]+delta));
+  }
+  me.scores=scores;
+  // Refresh inputs and cell colors
+  document.querySelectorAll('.sc-cell input').forEach(inp=>{
+    const idx=parseInt(inp.dataset.hole,10);
+    inp.value=scores[idx];
+    const td=$('sc-td-'+idx);
+    if(td)td.className='sc-cell '+scoreClass(scores[idx],PARS[idx]);
+  });
+  refreshOutInTotals();
+  renderTotals();
+  saveScores();
+  $('finish-btn').style.display=allHolesFilled()&&!isLocked(me)?'flex':'none';
+}
+
+function clearMyScores(){
+  if(!me)return;
+  if(isLocked(me)){alert('Card is locked — leave and rejoin to test again.');return;}
+  me.scores=new Array(18).fill(null);
+  document.querySelectorAll('.sc-cell input').forEach(inp=>{
+    const idx=parseInt(inp.dataset.hole,10);
+    inp.value='';
+    const td=$('sc-td-'+idx);
+    if(td)td.className='sc-cell';
+  });
+  refreshOutInTotals();
+  renderTotals();
+  saveScores();
+  $('finish-btn').style.display='none';
+}
+
 // ===== Boot =====
 (async function(){
+  if(isTestMode()){
+    $('test-panel').style.display='block';
+  }
   $('event-status-line').innerHTML=statusLine();
   updateOnline();
   const ok=await checkExistingSession();
