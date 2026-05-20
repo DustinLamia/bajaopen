@@ -91,11 +91,11 @@
   .me-display{display:block;}
   .me-display.hidden{display:none;}
 
-  /* Lock screen on scorecard */
-  .lock-overlay{padding:30px 18px;text-align:center;border:1px dashed var(--line-strong);border-radius:14px;background:rgba(0,0,0,.3);margin:14px 18px;}
-  .lock-overlay .clock{font-family:'Bebas Neue',cursive;font-size:2.4rem;color:var(--bb-teal-bright);letter-spacing:2px;line-height:1;text-shadow:0 0 24px rgba(184,239,233,.45);}
-  .lock-overlay .lock-lbl{font-size:.7rem;color:var(--bb-teal);letter-spacing:2px;text-transform:uppercase;margin-top:10px;font-weight:700;}
-  .lock-overlay .lock-sub{font-size:.78rem;color:var(--bb-tan);margin-top:8px;line-height:1.5;}
+  /* Lock countdown banner — sits above the scorecard before 11am */
+  .lock-overlay{padding:22px 16px 18px;text-align:center;background:linear-gradient(135deg,rgba(219,21,31,.14) 0%,rgba(0,0,0,.3) 70%);border-bottom:1px solid var(--line);}
+  .lock-overlay .clock{font-family:'Bebas Neue',cursive;font-size:2.6rem;color:var(--bb-cream);letter-spacing:3px;line-height:1;text-shadow:0 0 28px rgba(219,21,31,.5);margin:6px 0;}
+  .lock-overlay .lock-lbl{font-size:.7rem;color:var(--bb-red-soft);letter-spacing:2.5px;text-transform:uppercase;font-weight:700;}
+  .lock-overlay .lock-sub{font-size:.72rem;color:var(--bb-tan);margin-top:8px;line-height:1.5;letter-spacing:.5px;}
 
   /* Horizontal scorecard */
   .sc-section-label{padding:13px 18px 6px;font-size:.7rem;letter-spacing:2px;color:var(--bb-teal-bright);text-transform:uppercase;font-weight:700;}
@@ -569,16 +569,17 @@ function allHolesFilled(){
 // ===== Lock overlay (before 11am) =====
 function renderLockOverlay(){
   const wrap=$('lock-overlay-wrap');
+  // Always show the scorecard body. Pre-11am, show a countdown banner above it
+  // and disable the inputs (handled in applyLockUI).
+  $('scorecard-body').style.display='block';
   if(scoringIsOpen()){
     wrap.innerHTML='';
-    $('scorecard-body').style.display='block';
     return;
   }
-  $('scorecard-body').style.display='none';
   wrap.innerHTML='<div class="lock-overlay">'
+    +'<div class="lock-lbl">Scoring opens in</div>'
     +'<div class="clock">'+lockCountdown()+'</div>'
-    +'<div class="lock-lbl">Scoring opens Sunday 11:00am ET</div>'
-    +'<div class="lock-sub">First tee at 12:06pm &middot; Enter scores once the round starts.</div>'
+    +'<div class="lock-sub">Sunday 11:00am ET &middot; First tee at 12:06pm</div>'
     +'</div>';
 }
 
