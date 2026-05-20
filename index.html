@@ -409,9 +409,13 @@ function renderTotals(){
   $('t-gross').textContent=s.gross||'-';
   $('t-vspar').textContent=s.thru?(s.vspar===0?'E':(s.vspar>0?'+'+s.vspar:s.vspar)):'-';
   if(s.thru===18){
-    $('t-net').textContent=(s.gross-me.handicap);
+    // Final net — full handicap subtracted
+    $('t-net').textContent=(s.gross-(me.handicap||0));
   } else if(s.thru>0){
-    $('t-net').textContent='-';
+    // Live net using the same pro-rated handicap the leaderboard uses,
+    // so the scorecard and the leaderboard always agree.
+    const hcpUsed=Math.round((me.handicap||0)*(s.thru/18));
+    $('t-net').textContent='~'+(s.gross-hcpUsed);
   } else {
     $('t-net').textContent='-';
   }
